@@ -37,3 +37,7 @@ temp/
 # Operating-system files
 .DS_Store
 Thumbs.db
+
+*.db
+*.sqlite
+*.sqlite3
