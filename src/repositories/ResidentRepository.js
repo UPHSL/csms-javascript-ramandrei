@@ -63,28 +63,43 @@ export class ResidentRepository {
     });
   }
 
-update(resident) {
+  update(resident) {
+    const statement = this.database.prepare(`
+      UPDATE residents
+      SET
+        first_name = ?,
+        last_name = ?,
+        address = ?,
+        contact_number = ?,
+        email = ?
+      WHERE id = ?
+    `);
+
+    statement.run(
+      resident.firstName,
+      resident.lastName,
+      resident.address,
+      resident.contactNumber,
+      resident.email,
+      resident.id
+    );
+
+    return this.findById(resident.id);
+  }
+
+  deactivateById(residentId) {
   const statement = this.database.prepare(`
     UPDATE residents
-    SET
-      first_name = ?,
-      last_name = ?,
-      address = ?,
-      contact_number = ?,
-      email = ?
+    SET status = ?
     WHERE id = ?
   `);
 
   statement.run(
-    resident.firstName,
-    resident.lastName,
-    resident.address,
-    resident.contactNumber,
-    resident.email,
-    resident.id
+    "Inactive",
+    residentId
   );
 
-  return this.findById(resident.id);
+  return this.findById(residentId);
 }
 
   findAll() {
