@@ -63,6 +63,30 @@ export class ResidentRepository {
     });
   }
 
+update(resident) {
+  const statement = this.database.prepare(`
+    UPDATE residents
+    SET
+      first_name = ?,
+      last_name = ?,
+      address = ?,
+      contact_number = ?,
+      email = ?
+    WHERE id = ?
+  `);
+
+  statement.run(
+    resident.firstName,
+    resident.lastName,
+    resident.address,
+    resident.contactNumber,
+    resident.email,
+    resident.id
+  );
+
+  return this.findById(resident.id);
+}
+
   findAll() {
     const statement = this.database.prepare(`
       SELECT
@@ -123,6 +147,8 @@ export class ResidentRepository {
       status: row.status
     });
   }
+
+
 
   close() {
     this.database.close();
