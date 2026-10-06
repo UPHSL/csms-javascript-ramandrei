@@ -54,6 +54,21 @@ export class ServiceRequestRepository {
     return this.toServiceRequest(row);
   }
 
+  updateStatus(serviceRequestId, status) {
+    const statement = this.database.prepare(`
+      UPDATE service_requests
+      SET status = ?
+      WHERE id = ?
+    `);
+
+    statement.run(
+      status,
+      serviceRequestId
+    );
+
+    return this.findById(serviceRequestId);
+  }
+
   toServiceRequest(row) {
     return new ServiceRequest({
       id: Number(row.id),
