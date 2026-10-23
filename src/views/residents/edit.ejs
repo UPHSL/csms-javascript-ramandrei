@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <section class="card form-card">
+      <p class="label">Resident Management</p>
+      <h1>Edit Resident</h1>
+      <p>Update the resident's information.</p>
+
+      <% if (errorMessage) { %>
+        <p class="error-message" role="alert"><%= errorMessage %></p>
+      <% } %>
+
+      <div class="record-details">
+        <p>
+          <strong>Resident ID:</strong>
+          <input type="text" value="<%= resident.id %>" readonly aria-label="Resident ID">
+        </p>
+        <p>
+          <strong>Status:</strong>
+          <span class="status-badge <%= resident.status === 'Active' ? 'status-active' : 'status-inactive' %>">
+            <%= resident.status %>
+          </span>
+        </p>
+      </div>
+
+      <form action="/residents/<%= resident.id %>" method="POST" class="resident-form">
+        <div class="form-field">
+          <label for="firstName">First Name</label>
+          <input
+            id="firstName"
+            name="firstName"
+            type="text"
+            value="<%= resident.firstName %>"
+            required
+          >
+          <% if (errors.includes("firstName")) { %>
+            <p class="field-error">Enter a first name.</p>
+          <% } %>
+        </div>
+
+        <div class="form-field">
+          <label for="lastName">Last Name</label>
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            value="<%= resident.lastName %>"
+            required
+          >
+          <% if (errors.includes("lastName")) { %>
+            <p class="field-error">Enter a last name.</p>
+          <% } %>
+        </div>
+
+        <div class="form-field">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" rows="3" required><%= resident.address %></textarea>
+          <% if (errors.includes("address")) { %>
+            <p class="field-error">Enter an address.</p>
+          <% } %>
+        </div>
+
+        <div class="form-field">
+          <label for="contactNumber">Contact Number</label>
+          <input
+            id="contactNumber"
+            name="contactNumber"
+            type="tel"
+            value="<%= resident.contactNumber %>"
+            pattern="09[0-9]{9}"
+            title="Enter an 11-digit Philippine mobile number starting with 09."
+            required
+          >
+          <% if (errors.includes("contactNumber")) { %>
+            <p class="field-error">
+              Enter a valid 11-digit mobile number starting with 09.
+            </p>
+          <% } %>
+        </div>
+
+        <div class="form-field">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value="<%= resident.email %>"
+            required
+          >
+          <% if (errors.includes("email")) { %>
+            <p class="field-error">Enter a valid email address.</p>
+          <% } %>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Save Changes</button>
+          <a class="button-link secondary" href="/residents">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
