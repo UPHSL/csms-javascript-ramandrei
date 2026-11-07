@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <p class="label">Community Services Management System</p>
+      <h1>Dashboard</h1>
+      <p class="message">
+        Overview of registered residents and community service requests.
+      </p>
+
+      <nav class="module-navigation">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/residents">Residents</a>
+        <a href="/service-requests">Service Requests</a>
+      </nav>
+
+      <h2>Resident Summary</h2>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-stat">
+          <h3>Total Residents</h3>
+          <p class="dashboard-number"><%= residents.total %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Active Residents</h3>
+          <p class="dashboard-number"><%= residents.active %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Inactive Residents</h3>
+          <p class="dashboard-number"><%= residents.inactive %></p>
+        </article>
+      </div>
+
+      <h2>Service Request Summary</h2>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-stat">
+        <h3>Total Service Requests</h3>
+        <p class="dashboard-number"><%= serviceRequests.total %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Pending</h3>
+          <p class="dashboard-number"><%= serviceRequests.pending %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>In Progress</h3>
+          <p class="dashboard-number"><%= serviceRequests.inProgress %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Completed</h3>
+          <p class="dashboard-number"><%= serviceRequests.completed %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Cancelled</h3>
+          <p class="dashboard-number"><%= serviceRequests.cancelled %></p>
+        </article>
+
+        <article class="dashboard-stat">
+          <h3>Open Requests</h3>
+          <p class="dashboard-number"><%= serviceRequests.open %></p>
+          <p class="muted-text">Pending + In Progress</p>
+        </article>
+      </div>
+
+      <h2>Recent Service Requests</h2>
+
+      <% if (recentServiceRequests.length === 0) { %>
+        <p class="empty-state">
+          No Service Requests available.
+        </p>
+      <% } else { %>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Resident ID</th>
+                <th>Service Type</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% recentServiceRequests.forEach((serviceRequest) => { %>
+                <tr>
+                  <td><%= serviceRequest.id %></td>
+                  <td><%= serviceRequest.residentId %></td>
+                  <td><%= serviceRequest.serviceType %></td>
+                  <td><%= serviceRequest.dateRequested %></td>
+                  <td>
+                    <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
+                      <%= serviceRequest.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <a href="/service-requests/<%= serviceRequest.id %>">
+                      View
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+
+      <p class="back-link">
+        <a href="/">Back to Home</a>
+      </p>
+    </section>
+  </main>
+</body>
+</html>
