@@ -16,6 +16,14 @@ import { ResidentValidator } from "./services/ResidentValidator.js";
 import { notFound } from "./middleware/notFound.js";
 import residentRoutes from "./routes/residentRoutes.js";
 import mainRoutes from "./routes/index.js";
+import serviceRequestRoutes from "./routes/serviceRequestRoutes.js";
+
+import { ServiceRequestRepository } from "./repositories/ServiceRequestRepository.js";
+
+import ServiceRequestQueryService from "./services/ServiceRequestQueryService.js";
+import ServiceRequestStatusService from "./services/ServiceRequestStatusService.js";
+import ServiceRequestSubmissionService from "./services/ServiceRequestSubmissionService.js";
+import { ServiceRequestValidator } from "./services/ServiceRequestValidator.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
@@ -52,6 +60,12 @@ export function createApp({
   const residentRepository = new ResidentRepository(database);
   const residentValidator = new ResidentValidator();
 
+  const serviceRequestRepository =
+  new ServiceRequestRepository(database);
+
+const serviceRequestValidator =
+  new ServiceRequestValidator();
+
   // Share existing business services with the routes that need them.
     app.locals.residentRepository = residentRepository;
 
@@ -68,10 +82,30 @@ export function createApp({
     deactivation: new ResidentDeactivationService(residentRepository)
   };
 
-  app.use(mainRoutes);
-  app.use("/residents", residentRoutes);
+app.locals.serviceRequestRepository =
+  serviceRequestRepository;
 
-  app.use(notFound);
+app.locals.serviceRequestServices = {
+  query: new ServiceRequestQueryService(
+    serviceRequestRepository
+  ),
+
+  submission: new ServiceRequestSubmissionService(
+    serviceRequestValidator,
+    residentRepository,
+    serviceRequestRepository
+  ),
+
+  status: new ServiceRequestStatusService(
+    serviceRequestRepository
+  )
+};
+
+app.use(mainRoutes);
+app.use("/residents", residentRoutes);
+app.use("/service-requests", serviceRequestRoutes);
+
+app.use(notFound);
 
   return app;
 }
