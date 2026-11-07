@@ -341,3 +341,116 @@ textarea:focus {
     flex: 1;
   }
 }
+
+/* T13 - Service Request Management */
+
+/* Navigation between application modules */
+.module-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.module-navigation a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.module-navigation a:hover {
+  text-decoration: underline;
+}
+
+/* Combined search and status filter */
+.filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.filter-grid .form-field {
+  min-width: 0;
+}
+
+.filter-grid select {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+}
+
+.filter-grid select:focus {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+  border-color: #2563eb;
+}
+
+/* Supporting form instructions */
+.help-text {
+  margin: 0.35rem 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Service Request status badges */
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Workflow action presentation */
+.row-actions .danger-button {
+  white-space: nowrap;
+}
+
+.row-actions form button {
+  white-space: nowrap;
+}
+
+.muted-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Service Request details */
+.record-details > div > p {
+  margin: 0.5rem 0 0;
+  line-height: 1.6;
+}
+
+.record-details {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .module-navigation {
+    gap: 0.75rem;
+  }
+}

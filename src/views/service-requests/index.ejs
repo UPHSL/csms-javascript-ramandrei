@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <section class="card resident-card">
+      <p class="label">Community Services Management System</p>
+      <h1>Service Request Management</h1>
+      <p class="message">
+        Submit, locate, review, and process community service requests.
+      </p>
+
+      <nav class="module-navigation">
+        <a href="/residents">Residents</a>
+        <a href="/service-requests">Service Requests</a>
+      </nav>
+
+      <% if (noticeMessage) { %>
+        <p class="notice" role="status"><%= noticeMessage %></p>
+      <% } %>
+
+      <% if (errorMessage) { %>
+        <p class="error-message" role="alert"><%= errorMessage %></p>
+      <% } %>
+
+      <div class="page-actions">
+        <a class="button-link" href="/service-requests/new">
+          + Submit Service Request
+        </a>
+      </div>
+
+      <form action="/service-requests" method="GET" class="search-form">
+        <div class="filter-grid">
+          <div class="form-field">
+            <label for="search">Search Service Requests</label>
+            <input
+              id="search"
+              name="search"
+              type="search"
+              value="<%= searchTerm %>"
+              placeholder="Search service type or description"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="status">Filter by Status</label>
+            <select id="status" name="status">
+              <option value="" <%= selectedStatus === "" ? "selected" : "" %>>
+                All Statuses
+              </option>
+              <option value="Pending" <%= selectedStatus === "Pending" ? "selected" : "" %>>
+                Pending
+              </option>
+              <option value="In Progress" <%= selectedStatus === "In Progress" ? "selected" : "" %>>
+                In Progress
+              </option>
+              <option value="Completed" <%= selectedStatus === "Completed" ? "selected" : "" %>>
+                Completed
+              </option>
+              <option value="Cancelled" <%= selectedStatus === "Cancelled" ? "selected" : "" %>>
+                Cancelled
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Search / Filter</button>
+          <a class="button-link secondary" href="/service-requests">
+            Clear
+          </a>
+        </div>
+      </form>
+
+      <h2>Service Request Records</h2>
+
+      <% if (serviceRequests.length === 0) { %>
+        <p class="empty-state">
+          No Service Requests found.
+        </p>
+      <% } else { %>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Resident ID</th>
+                <th>Service Type</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Available Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% serviceRequests.forEach((serviceRequest) => { %>
+                <tr>
+                  <td><%= serviceRequest.id %></td>
+                  <td><%= serviceRequest.residentId %></td>
+                  <td><%= serviceRequest.serviceType %></td>
+                  <td><%= serviceRequest.dateRequested %></td>
+                  <td>
+                    <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
+                      <%= serviceRequest.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <a href="/service-requests/<%= serviceRequest.id %>">
+                        View
+                      </a>
+
+                      <% if (serviceRequest.status === "Pending") { %>
+                        <form
+                          action="/service-requests/<%= serviceRequest.id %>/start-processing"
+                          method="POST"
+                        >
+                          <button type="submit">Start Processing</button>
+                        </form>
+
+                        <form
+                          action="/service-requests/<%= serviceRequest.id %>/cancel"
+                          method="POST"
+                          onsubmit="return confirm('Cancel this Service Request?');"
+                        >
+                          <button class="danger-button" type="submit">
+                            Cancel
+                          </button>
+                        </form>
+
+                      <% } else if (serviceRequest.status === "In Progress") { %>
+                        <form
+                          action="/service-requests/<%= serviceRequest.id %>/complete"
+                          method="POST"
+                        >
+                          <button type="submit">Complete</button>
+                        </form>
+
+                        <form
+                          action="/service-requests/<%= serviceRequest.id %>/cancel"
+                          method="POST"
+                          onsubmit="return confirm('Cancel this Service Request?');"
+                        >
+                          <button class="danger-button" type="submit">
+                            Cancel
+                          </button>
+                        </form>
+
+                      <% } else { %>
+                        <span class="muted-text">No further actions</span>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+
+      <p class="back-link">
+        <a href="/">Back to Home</a>
+      </p>
+    </section>
+  </main>
+</body>
+</html>
