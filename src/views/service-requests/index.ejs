@@ -1,4 +1,12 @@
 
+<%
+  const activePage = 'service-requests';
+
+  const sortedServiceRequests = [...(serviceRequests || [])].sort((a, b) =>
+    String(b.dateRequested).localeCompare(String(a.dateRequested)) ||
+    Number(b.id) - Number(a.id)
+  );
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,167 +14,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card resident-card">
-      <p class="label">Community Services Management System</p>
-      <h1>Service Request Management</h1>
-      <p class="message">
-        Submit, locate, review, and process community service requests.
-      </p>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'service-requests' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
 
-      <nav class="module-navigation">
-        <a href="/residents">Residents</a>
-        <a href="/service-requests">Service Requests</a>
-      </nav>
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">COMMUNITY SERVICES</span>
+            <h1>Service Requests</h1>
+            <p>Track, review, and manage community service requests.</p>
+          </div>
+          <a href="/service-requests/new" class="button button-primary">+ New Request</a>
+        </section>
 
-      <% if (noticeMessage) { %>
-        <p class="notice" role="status"><%= noticeMessage %></p>
-      <% } %>
+        <% if (noticeMessage) { %>
+          <div class="notice-message"><%= noticeMessage %></div>
+        <% } %>
 
-      <% if (errorMessage) { %>
-        <p class="error-message" role="alert"><%= errorMessage %></p>
-      <% } %>
+        <% if (errorMessage) { %>
+          <div class="error-message"><%= errorMessage %></div>
+        <% } %>
 
-      <div class="page-actions">
-        <a class="button-link" href="/service-requests/new">
-          + Submit Service Request
-        </a>
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <h2>Request Directory</h2>
+              <p>Search requests or filter them by their current status.</p>
+            </div>
+            <span class="record-count"><%= sortedServiceRequests.length %> records</span>
+          </div>
+
+          <form action="/service-requests" method="GET" class="filter-grid">
+            <div class="form-group">
+              <label for="search">Search requests</label>
+              <input
+                id="search"
+                type="search"
+                name="search"
+                value="<%= searchTerm || '' %>"
+                placeholder="Search by service type or description..."
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="status">Request Status</label>
+              <select id="status" name="status">
+                <option value="">All Statuses</option>
+                <option value="Pending" <%= selectedStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="In Progress" <%= selectedStatus === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                <option value="Completed" <%= selectedStatus === 'Completed' ? 'selected' : '' %>>Completed</option>
+                <option value="Cancelled" <%= selectedStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </div>
+
+            <div class="filter-actions">
+              <button type="submit" class="button button-primary">Apply Filters</button>
+              <a href="/service-requests" class="button button-secondary">Clear</a>
+            </div>
+          </form>
+
+          <% if (sortedServiceRequests.length === 0) { %>
+            <div class="empty-state">
+              <div class="empty-state-icon">▤</div>
+              <h3>No service requests found</h3>
+              <p>Try changing your search or filter, or create a new request.</p>
+              <a href="/service-requests/new" class="button button-primary">Create Request</a>
+            </div>
+          <% } else { %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Resident ID</th>
+                    <th>Service Type</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% sortedServiceRequests.forEach((request) => { %>
+                    <tr>
+                      <td><%= request.id %></td>
+                      <td><%= request.residentId %></td>
+                      <td><%= request.serviceType %></td>
+                      <td><%= request.dateRequested %></td>
+                      <td>
+                        <span class="status-badge status-<%= request.status.toLowerCase().replaceAll(' ', '-') %>">
+                          <%= request.status %>
+                        </span>
+                      </td>
+                      <td>
+                        <a href="/service-requests/<%= request.id %>" class="button button-small button-secondary">
+                          View Details
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
       </div>
-
-      <form action="/service-requests" method="GET" class="search-form">
-        <div class="filter-grid">
-          <div class="form-field">
-            <label for="search">Search Service Requests</label>
-            <input
-              id="search"
-              name="search"
-              type="search"
-              value="<%= searchTerm %>"
-              placeholder="Search service type or description"
-            >
-          </div>
-
-          <div class="form-field">
-            <label for="status">Filter by Status</label>
-            <select id="status" name="status">
-              <option value="" <%= selectedStatus === "" ? "selected" : "" %>>
-                All Statuses
-              </option>
-              <option value="Pending" <%= selectedStatus === "Pending" ? "selected" : "" %>>
-                Pending
-              </option>
-              <option value="In Progress" <%= selectedStatus === "In Progress" ? "selected" : "" %>>
-                In Progress
-              </option>
-              <option value="Completed" <%= selectedStatus === "Completed" ? "selected" : "" %>>
-                Completed
-              </option>
-              <option value="Cancelled" <%= selectedStatus === "Cancelled" ? "selected" : "" %>>
-                Cancelled
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit">Search / Filter</button>
-          <a class="button-link secondary" href="/service-requests">
-            Clear
-          </a>
-        </div>
-      </form>
-
-      <h2>Service Request Records</h2>
-
-      <% if (serviceRequests.length === 0) { %>
-        <p class="empty-state">
-          No Service Requests found.
-        </p>
-      <% } else { %>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Resident ID</th>
-                <th>Service Type</th>
-                <th>Date Requested</th>
-                <th>Status</th>
-                <th>Available Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% serviceRequests.forEach((serviceRequest) => { %>
-                <tr>
-                  <td><%= serviceRequest.id %></td>
-                  <td><%= serviceRequest.residentId %></td>
-                  <td><%= serviceRequest.serviceType %></td>
-                  <td><%= serviceRequest.dateRequested %></td>
-                  <td>
-                    <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
-                      <%= serviceRequest.status %>
-                    </span>
-                  </td>
-                  <td>
-                    <div class="row-actions">
-                      <a href="/service-requests/<%= serviceRequest.id %>">
-                        View
-                      </a>
-
-                      <% if (serviceRequest.status === "Pending") { %>
-                        <form
-                          action="/service-requests/<%= serviceRequest.id %>/start-processing"
-                          method="POST"
-                        >
-                          <button type="submit">Start Processing</button>
-                        </form>
-
-                        <form
-                          action="/service-requests/<%= serviceRequest.id %>/cancel"
-                          method="POST"
-                          onsubmit="return confirm('Cancel this Service Request?');"
-                        >
-                          <button class="danger-button" type="submit">
-                            Cancel
-                          </button>
-                        </form>
-
-                      <% } else if (serviceRequest.status === "In Progress") { %>
-                        <form
-                          action="/service-requests/<%= serviceRequest.id %>/complete"
-                          method="POST"
-                        >
-                          <button type="submit">Complete</button>
-                        </form>
-
-                        <form
-                          action="/service-requests/<%= serviceRequest.id %>/cancel"
-                          method="POST"
-                          onsubmit="return confirm('Cancel this Service Request?');"
-                        >
-                          <button class="danger-button" type="submit">
-                            Cancel
-                          </button>
-                        </form>
-
-                      <% } else { %>
-                        <span class="muted-text">No further actions</span>
-                      <% } %>
-                    </div>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-
-      <p class="back-link">
-        <a href="/">Back to Home</a>
-      </p>
-    </section>
-  </main>
+    </main>
+  </div>
 </body>
 </html>

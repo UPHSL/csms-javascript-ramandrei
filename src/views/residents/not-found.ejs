@@ -1,4 +1,7 @@
 
+<%
+  const activePage = 'residents';
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,15 +9,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <p class="label">Resident Management</p>
-      <h1>Resident Not Found</h1>
-      <p class="message"><%= message %></p>
-      <p><a class="button-link" href="/residents">Return to Resident Management</a></p>
-    </section>
-  </main>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'residents' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
+
+      <div class="main-content">
+        <section class="empty-state page-empty-state">
+          <div class="empty-state-icon">♙</div>
+          <span class="eyebrow">RESIDENT MANAGEMENT</span>
+          <h1>Resident Not Found</h1>
+          <p><%= message || 'The requested Resident could not be found.' %></p>
+          <p>The Resident could not be found in the records.</p>
+          <a href="/residents" class="button button-primary">Return to Resident Management</a>
+        </section>
+      </div>
+    </main>
+  </div>
 </body>
 </html>

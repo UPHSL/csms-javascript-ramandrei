@@ -46,12 +46,10 @@ function showNotFound(response) {
   );
 }
 
-// Display Service Request listing, search results, and status-filtered results.
 export function listServiceRequests(request, response) {
   const searchTerm = readString(request.query.search);
   const selectedStatus = readString(request.query.status);
 
-  // An empty status represents All Statuses.
   const statusFilter =
     selectedStatus === "" || selectedStatus === "All Statuses"
       ? null
@@ -93,7 +91,6 @@ export function listServiceRequests(request, response) {
   );
 }
 
-// Display the Service Request submission form.
 export function showSubmissionForm(request, response) {
   return response.status(200).render(
     "service-requests/new",
@@ -106,14 +103,11 @@ export function showSubmissionForm(request, response) {
   );
 }
 
-// Submit a Service Request through the existing T09 service.
 export function submitServiceRequest(request, response) {
   const formData = getFormData(request.body);
 
   const rawResidentId = formData.residentId.trim();
 
-  // HTML form values arrive as strings.
-  // Convert the Resident ID to a number for T09 validation.
   const residentId =
     rawResidentId === "" ? NaN : Number(rawResidentId);
 
@@ -130,6 +124,7 @@ export function submitServiceRequest(request, response) {
     request.app.locals.serviceRequestServices.submission
       .submitServiceRequest(serviceRequest);
 
+  
   if (!result.success) {
     let errorMessage =
       "Please correct the Service Request information.";
@@ -139,6 +134,28 @@ export function submitServiceRequest(request, response) {
     } else if (result.residentInactive) {
       errorMessage =
         "Inactive Residents cannot submit new Service Requests.";
+    } else {
+      const validationMessages = {
+        residentId: "Resident ID is required.",
+        serviceType: "Service type is required.",
+        description: "Service request description is required.",
+        dateRequested: "Date requested is required."
+      };
+
+      const specificErrors = (result.errors ?? [])
+        .map((error) => {
+          const field =
+            typeof error === "string"
+              ? error
+              : error.field ?? error.path ?? error.message;
+
+          return validationMessages[field] ?? null;
+        })
+        .filter(Boolean);
+
+      if (specificErrors.length > 0) {
+        errorMessage += ` ${specificErrors.join(" ")}`;
+      }
     }
 
     return response.status(400).render(
@@ -146,11 +163,12 @@ export function submitServiceRequest(request, response) {
       {
         pageTitle: "Submit Service Request",
         serviceRequest: formData,
-        errors: result.errors,
+        errors: result.errors ?? [],
         errorMessage
       }
     );
   }
+
 
   return response.redirect(
     303,
@@ -158,7 +176,6 @@ export function submitServiceRequest(request, response) {
   );
 }
 
-// Display one persisted Service Request.
 export function showServiceRequest(request, response) {
   const serviceRequestId =
     parseServiceRequestId(request.params.id);
@@ -190,7 +207,6 @@ export function showServiceRequest(request, response) {
   );
 }
 
-// Use the established T10 status service for workflow actions.
 function changeServiceRequestStatus(
   request,
   response,

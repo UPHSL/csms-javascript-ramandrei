@@ -1,4 +1,7 @@
 
+<%
+  const activePage = 'service-requests';
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,108 +9,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card form-card">
-      <p class="label">Service Request Management</p>
-      <h1>Submit Service Request</h1>
-      <p>Provide the information needed to submit a new request.</p>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'service-requests' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
 
-      <nav class="module-navigation">
-        <a href="/residents">Residents</a>
-        <a href="/service-requests">Service Requests</a>
-      </nav>
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">COMMUNITY SERVICES</span>
+            <h1>New Service Request</h1>
+            <p>Record a new service request submitted by a resident.</p>
+          </div>
+          <a href="/service-requests" class="button button-secondary">← Back to Requests</a>
+        </section>
 
-      <% if (errorMessage) { %>
-        <p class="error-message" role="alert"><%= errorMessage %></p>
-      <% } %>
+        <% if (errorMessage) { %>
+          <div class="error-message"><%= errorMessage %></div>
+        <% } %>
 
-      <form action="/service-requests" method="POST" class="resident-form">
-        <div class="form-field">
-          <label for="residentId">Resident ID</label>
-          <input
-            id="residentId"
-            name="residentId"
-            type="number"
-            min="1"
-            step="1"
-            value="<%= serviceRequest.residentId %>"
-            required
-          >
-          <% if (errors.includes("residentId")) { %>
-            <p class="field-error">
-              Enter a valid positive Resident ID.
-            </p>
-          <% } %>
-          <p class="help-text">
-            Enter the ID of an existing Active Resident.
-          </p>
-          <a href="/residents">View Residents</a>
-        </div>
+        <% if (errors && errors.length > 0) { %>
+  <div class="error-message">
+    <ul>
+      <% errors.forEach((error) => { %>
+        <li>
+          <%= typeof error === 'string'
+            ? error
+            : error.message || error.error || '' %>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
 
-        <div class="form-field">
-          <label for="serviceType">Service Type</label>
-          <input
-            id="serviceType"
-            name="serviceType"
-            type="text"
-            value="<%= serviceRequest.serviceType %>"
-            placeholder="Example: Barangay Clearance"
-            required
-          >
-          <% if (errors.includes("serviceType")) { %>
-            <p class="field-error">
-              Service type is required.
-            </p>
-          <% } %>
-        </div>
+        <section class="form-card">
+          <div class="form-card-heading">
+            <div>
+              <h2>Request Information</h2>
+              <p>Provide the resident and service details below.</p>
+            </div>
+          </div>
 
-        <div class="form-field">
-          <label for="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            rows="5"
-            placeholder="Describe the requested service."
-            required
-          ><%= serviceRequest.description %></textarea>
-          <% if (errors.includes("description")) { %>
-            <p class="field-error">
-              Description is required.
-            </p>
-          <% } %>
-        </div>
+          <form action="/service-requests" method="POST">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="residentId">Resident ID <span class="required">*</span></label>
+                <input
+                  id="residentId"
+                  name="residentId"
+                  type="number"
+                  min="1"
+                  value="<%= serviceRequest?.residentId || '' %>"
+                  placeholder="Enter resident ID"
+                  required
+                >
+                <span class="field-hint">Enter the ID of the resident submitting the request.</span>
+              </div>
 
-        <div class="form-field">
-          <label for="dateRequested">Date Requested</label>
-          <input
-            id="dateRequested"
-            name="dateRequested"
-            type="date"
-            value="<%= serviceRequest.dateRequested %>"
-            required
-          >
-          <% if (errors.includes("dateRequested")) { %>
-            <p class="field-error">
-              Enter a valid requested date.
-            </p>
-          <% } %>
-        </div>
+              <div class="form-group">
+                <label for="serviceType">Service Type <span class="required">*</span></label>
+                <input
+                  id="serviceType"
+                  name="serviceType"
+                  type="text"
+                  value="<%= serviceRequest?.serviceType || '' %>"
+                  placeholder="e.g. Barangay Clearance"
+                  required
+                >
+              </div>
 
-        <p class="help-text">
-          New Service Requests are automatically assigned Pending status.
-        </p>
+              <div class="form-group form-group-full">
+                <label for="description">Request Description <span class="required">*</span></label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="5"
+                  placeholder="Describe the resident's request..."
+                  required
+                ><%= serviceRequest?.description || '' %></textarea>
+              </div>
 
-        <div class="form-actions">
-          <button type="submit">Submit Service Request</button>
-          <a class="button-link secondary" href="/service-requests">
-            Cancel
-          </a>
-        </div>
-      </form>
-    </section>
-  </main>
+              <div class="form-group">
+                <label for="dateRequested">Date Requested <span class="required">*</span></label>
+                <input
+                  id="dateRequested"
+                  name="dateRequested"
+                  type="date"
+                  value="<%= serviceRequest?.dateRequested || '' %>"
+                  required
+                >
+              </div>
+            </div>
+
+            <p class="field-hint">New Service Requests are automatically assigned Pending status.</p>
+
+            <div class="form-actions">
+              <a href="/service-requests" class="button button-secondary">Cancel</a>
+              <button type="submit" class="button button-primary">Submit Request</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
-

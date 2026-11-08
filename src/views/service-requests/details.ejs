@@ -1,4 +1,8 @@
 
+<%
+  const activePage = 'service-requests';
+  const isTerminal = serviceRequest.status === 'Completed' || serviceRequest.status === 'Cancelled';
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,111 +10,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card form-card">
-      <p class="label">Service Request Management</p>
-      <h1>Service Request Details</h1>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'service-requests' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
 
-      <nav class="module-navigation">
-        <a href="/residents">Residents</a>
-        <a href="/service-requests">Service Requests</a>
-      </nav>
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">REQUEST MANAGEMENT</span>
+            <h1>Request Details</h1>
+            <p>Review the submitted request and update its progress.</p>
+          </div>
+          <a href="/service-requests" class="button button-secondary">← Back to Requests</a>
+        </section>
 
-      <% if (noticeMessage) { %>
-        <p class="notice" role="status"><%= noticeMessage %></p>
-      <% } %>
-
-      <div class="record-details">
-        <p>
-          <strong>Service Request ID:</strong>
-          <%= serviceRequest.id %>
-        </p>
-
-        <p>
-          <strong>Resident ID:</strong>
-          <%= serviceRequest.residentId %>
-        </p>
-
-        <p>
-          <strong>Service Type:</strong>
-          <%= serviceRequest.serviceType %>
-        </p>
-
-        <div>
-          <strong>Description:</strong>
-          <p><%= serviceRequest.description %></p>
-        </div>
-
-        <p>
-          <strong>Date Requested:</strong>
-          <%= serviceRequest.dateRequested %>
-        </p>
-
-        <p>
-          <strong>Status:</strong>
-          <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
-            <%= serviceRequest.status %>
-          </span>
-        </p>
-      </div>
-
-      <h2>Workflow Actions</h2>
-
-      <div class="form-actions">
-        <% if (serviceRequest.status === "Pending") { %>
-          <form
-            action="/service-requests/<%= serviceRequest.id %>/start-processing"
-            method="POST"
-          >
-            <button type="submit">Start Processing</button>
-          </form>
-
-          <form
-            action="/service-requests/<%= serviceRequest.id %>/cancel"
-            method="POST"
-            onsubmit="return confirm('Cancel this Service Request?');"
-          >
-            <button class="danger-button" type="submit">
-              Cancel Request
-            </button>
-          </form>
-
-        <% } else if (serviceRequest.status === "In Progress") { %>
-          <form
-            action="/service-requests/<%= serviceRequest.id %>/complete"
-            method="POST"
-          >
-            <button type="submit">Complete Request</button>
-          </form>
-
-          <form
-            action="/service-requests/<%= serviceRequest.id %>/cancel"
-            method="POST"
-            onsubmit="return confirm('Cancel this Service Request?');"
-          >
-            <button class="danger-button" type="submit">
-              Cancel Request
-            </button>
-          </form>
-
-        <% } else if (serviceRequest.status === "Completed") { %>
-          <p class="empty-state">
-            This Service Request is completed. No further workflow actions are available.
-          </p>
-
-        <% } else if (serviceRequest.status === "Cancelled") { %>
-          <p class="empty-state">
-            This Service Request is cancelled. No further workflow actions are available.
-          </p>
+        <% if (noticeMessage) { %>
+          <div class="notice-message"><%= noticeMessage %></div>
         <% } %>
-      </div>
 
-      <p class="back-link">
-        <a href="/service-requests">Back to Service Request Management</a>
-      </p>
-    </section>
-  </main>
+        <section class="content-card request-detail-card">
+          <div class="detail-heading">
+            <div>
+              <span class="detail-overline">SERVICE REQUEST</span>
+              <h2>Request #<%= serviceRequest.id %></h2>
+            </div>
+            <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
+              <%= serviceRequest.status %>
+            </span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Resident ID</span>
+              <strong><%= serviceRequest.residentId %></strong>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Service Type</span>
+              <strong><%= serviceRequest.serviceType %></strong>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Date Requested</span>
+              <strong><%= serviceRequest.dateRequested %></strong>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Current Status</span>
+              <strong><%= serviceRequest.status %></strong>
+            </div>
+
+            <div class="detail-item detail-item-full">
+              <span class="detail-label">Request Description</span>
+              <p class="detail-description"><%= serviceRequest.description %></p>
+            </div>
+          </div>
+
+          <div class="workflow-section">
+            <div>
+              <h3>Request Workflow</h3>
+              <p>Choose the appropriate action based on the current request status.</p>
+            </div>
+
+            <div class="workflow-actions">
+              <% if (serviceRequest.status === 'Pending') { %>
+                <form action="/service-requests/<%= serviceRequest.id %>/start-processing" method="POST">
+                  <button type="submit" class="button button-primary">Start Processing</button>
+                </form>
+              <% } %>
+
+              <% if (serviceRequest.status === 'In Progress') { %>
+                <form action="/service-requests/<%= serviceRequest.id %>/complete" method="POST">
+                  <button type="submit" class="button button-success">Mark as Completed</button>
+                </form>
+              <% } %>
+
+              <% if (serviceRequest.status === 'Pending' || serviceRequest.status === 'In Progress') { %>
+                <form
+                  action="/service-requests/<%= serviceRequest.id %>/cancel"
+                  method="POST"
+                  onsubmit="return confirm('Are you sure you want to cancel this service request?');"
+                >
+                  <button type="submit" class="button button-danger">Cancel Request</button>
+                </form>
+              <% } %>
+
+              <% if (isTerminal) { %>
+                <span class="workflow-final-message">
+                  No further workflow actions. This request has reached its final status.
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
