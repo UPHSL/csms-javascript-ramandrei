@@ -1,4 +1,7 @@
 
+<%
+  const activePage = 'service-requests';
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,19 +9,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <p class="label">Service Request Management</p>
-      <h1>Service Request Not Found</h1>
-      <p class="message"><%= message %></p>
-      <p>
-        <a class="button-link" href="/service-requests">
-          Return to Service Request Management
-        </a>
-      </p>
-    </section>
-  </main>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'service-requests' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
+
+      <div class="main-content">
+        <section class="empty-state page-empty-state">
+          <div class="empty-state-icon">▤</div>
+          <span class="eyebrow">REQUEST MANAGEMENT</span>
+          <h1>Service Request Not Found</h1>
+          <p><%= message %></p>
+          <a href="/service-requests" class="button button-primary">Return to Service Requests</a>
+        </section>
+      </div>
+    </main>
+  </div>
 </body>
 </html>

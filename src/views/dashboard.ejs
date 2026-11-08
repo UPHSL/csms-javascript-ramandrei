@@ -1,4 +1,26 @@
 
+<%
+  const activePage = 'dashboard';
+
+  const sortedRecentRequests = [...(recentServiceRequests || [])]
+    .sort((a, b) =>
+      String(b.dateRequested).localeCompare(String(a.dateRequested)) ||
+      Number(b.id) - Number(a.id)
+    )
+    .slice(0, 5);
+
+  const dashboardStats = [
+    { label: 'Total Residents', value: residents.total },
+    { label: 'Active Residents', value: residents.active },
+    { label: 'Inactive Residents', value: residents.inactive },
+    { label: 'Total Service Requests', value: serviceRequests.total },
+    { label: 'Pending', value: serviceRequests.pending },
+    { label: 'In Progress', value: serviceRequests.inProgress },
+    { label: 'Completed', value: serviceRequests.completed },
+    { label: 'Cancelled', value: serviceRequests.cancelled },
+    { label: 'Open Requests', value: serviceRequests.open }
+  ];
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,124 +28,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %> | CSMS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <p class="label">Community Services Management System</p>
-      <h1>Dashboard</h1>
-      <p class="message">
-        Overview of registered residents and community service requests.
-      </p>
+  <div class="app-shell">
+    <%- include('partials/sidebar', { activePage: 'dashboard' }) %>
 
-      <nav class="module-navigation">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/residents">Residents</a>
-        <a href="/service-requests">Service Requests</a>
-      </nav>
+    <main class="main-area">
+      <%- include('partials/topbar') %>
 
-      <h2>Resident Summary</h2>
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">OVERVIEW</span>
+            <h1>Dashboard</h1>
+            <p>Monitor residents and community service requests.</p>
+          </div>
+          <a href="/service-requests/new" class="button button-primary">
+            + New Service Request
+          </a>
+        </section>
 
-      <div class="dashboard-grid">
-        <article class="dashboard-stat">
-          <h3>Total Residents</h3>
-          <p class="dashboard-number"><%= residents.total %></p>
-        </article>
+        <section class="dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Resident Overview</h2>
+              <p>Summary of registered residents</p>
+            </div>
+            <a href="/residents" class="text-link">View residents →</a>
+          </div>
 
-        <article class="dashboard-stat">
-          <h3>Active Residents</h3>
-          <p class="dashboard-number"><%= residents.active %></p>
-        </article>
+          <div class="dashboard-grid">
+            <% dashboardStats.slice(0, 3).forEach((stat) => { %>
+              <article class="dashboard-stat dashboard-card">
+                <h3><%= stat.label %></h3>
+                <p class="dashboard-number"><%= Number(stat.value) || 0 %></p>
+              </article>
+            <% }); %>
+          </div>
+        </section>
 
-        <article class="dashboard-stat">
-          <h3>Inactive Residents</h3>
-          <p class="dashboard-number"><%= residents.inactive %></p>
-        </article>
+        <section class="dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Service Request Overview</h2>
+              <p>Current status of submitted requests</p>
+            </div>
+            <a href="/service-requests" class="text-link">View all requests →</a>
+          </div>
+
+          <div class="dashboard-grid dashboard-grid-five">
+            <% dashboardStats.slice(3).forEach((stat) => { %>
+              <article class="dashboard-stat dashboard-card">
+                <h3><%= stat.label %></h3>
+                <p class="dashboard-number"><%= Number(stat.value) || 0 %></p>
+              </article>
+            <% }); %>
+          </div>
+        </section>
+
+        <section class="content-card dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Recent Service Requests</h2>
+              <p>The latest submitted community requests</p>
+            </div>
+            <a href="/service-requests" class="text-link">See all →</a>
+          </div>
+
+          <% if (sortedRecentRequests.length === 0) { %>
+            <div class="empty-state">
+              <div class="empty-state-icon">▤</div>
+              <h3>No service requests yet</h3>
+              <p>Newly submitted requests will appear here.</p>
+            </div>
+          <% } else { %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Resident ID</th>
+                    <th>Service Type</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% sortedRecentRequests.forEach((request) => { %>
+                    <tr>
+                      <td><%= request.id %></td>
+                      <td><%= request.residentId %></td>
+                      <td><%= request.serviceType %></td>
+                      <td><%= request.dateRequested %></td>
+                      <td>
+                        <span class="status-badge status-<%= request.status.toLowerCase().replaceAll(' ', '-') %>">
+                          <%= request.status %>
+                        </span>
+                      </td>
+                      <td>
+                        <a class="table-link" href="/service-requests/<%= request.id %>">
+                          View details
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
       </div>
-
-      <h2>Service Request Summary</h2>
-
-      <div class="dashboard-grid">
-        <article class="dashboard-stat">
-        <h3>Total Service Requests</h3>
-        <p class="dashboard-number"><%= serviceRequests.total %></p>
-        </article>
-
-        <article class="dashboard-stat">
-          <h3>Pending</h3>
-          <p class="dashboard-number"><%= serviceRequests.pending %></p>
-        </article>
-
-        <article class="dashboard-stat">
-          <h3>In Progress</h3>
-          <p class="dashboard-number"><%= serviceRequests.inProgress %></p>
-        </article>
-
-        <article class="dashboard-stat">
-          <h3>Completed</h3>
-          <p class="dashboard-number"><%= serviceRequests.completed %></p>
-        </article>
-
-        <article class="dashboard-stat">
-          <h3>Cancelled</h3>
-          <p class="dashboard-number"><%= serviceRequests.cancelled %></p>
-        </article>
-
-        <article class="dashboard-stat">
-          <h3>Open Requests</h3>
-          <p class="dashboard-number"><%= serviceRequests.open %></p>
-          <p class="muted-text">Pending + In Progress</p>
-        </article>
-      </div>
-
-      <h2>Recent Service Requests</h2>
-
-      <% if (recentServiceRequests.length === 0) { %>
-        <p class="empty-state">
-          No Service Requests available.
-        </p>
-      <% } else { %>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Resident ID</th>
-                <th>Service Type</th>
-                <th>Date Requested</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <% recentServiceRequests.forEach((serviceRequest) => { %>
-                <tr>
-                  <td><%= serviceRequest.id %></td>
-                  <td><%= serviceRequest.residentId %></td>
-                  <td><%= serviceRequest.serviceType %></td>
-                  <td><%= serviceRequest.dateRequested %></td>
-                  <td>
-                    <span class="status-badge status-<%= serviceRequest.status.toLowerCase().replaceAll(' ', '-') %>">
-                      <%= serviceRequest.status %>
-                    </span>
-                  </td>
-                  <td>
-                    <a href="/service-requests/<%= serviceRequest.id %>">
-                      View
-                    </a>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-
-      <p class="back-link">
-        <a href="/">Back to Home</a>
-      </p>
-    </section>
-  </main>
+    </main>
+  </div>
 </body>
 </html>
