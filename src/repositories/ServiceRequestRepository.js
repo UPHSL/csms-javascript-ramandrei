@@ -160,7 +160,47 @@ export class ServiceRequestRepository {
     (row) => this.toServiceRequest(row)
   );
 }
-  
+
+countAll() {
+  const statement = this.database.prepare(`
+    SELECT COUNT(*) AS total
+    FROM service_requests
+  `);
+
+  return Number(statement.get().total);
+}
+
+countByStatus(status) {
+  const statement = this.database.prepare(`
+    SELECT COUNT(*) AS total
+    FROM service_requests
+    WHERE status = ?
+  `);
+
+  return Number(statement.get(status).total);
+}
+
+findRecent(limit = 5) {
+  const statement = this.database.prepare(`
+    SELECT
+      id,
+      resident_id,
+      service_type,
+      description,
+      date_requested,
+      status
+    FROM service_requests
+    ORDER BY
+      date_requested DESC,
+      id DESC
+    LIMIT ?
+  `);
+
+  const rows = statement.all(limit);
+
+  return rows.map((row) => this.toServiceRequest(row));
+}
+
   close() {
     this.database.close();
   }

@@ -163,7 +163,24 @@ export class ResidentRepository {
     });
   }
 
+countAll() {
+  const statement = this.database.prepare(`
+    SELECT COUNT(*) AS total
+    FROM residents
+  `);
 
+  return Number(statement.get().total);
+}
+
+countByStatus(status) {
+  const statement = this.database.prepare(`
+    SELECT COUNT(*) AS total
+    FROM residents
+    WHERE status = ?
+  `);
+
+  return Number(statement.get(status).total);
+}
 
   close() {
     this.database.close();

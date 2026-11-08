@@ -25,6 +25,8 @@ import ServiceRequestStatusService from "./services/ServiceRequestStatusService.
 import ServiceRequestSubmissionService from "./services/ServiceRequestSubmissionService.js";
 import { ServiceRequestValidator } from "./services/ServiceRequestValidator.js";
 
+import DashboardQueryService from "./services/DashboardQueryService.js";
+
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
 
@@ -100,6 +102,11 @@ app.locals.serviceRequestServices = {
     serviceRequestRepository
   )
 };
+
+app.locals.dashboardService = new DashboardQueryService(
+  residentRepository,
+  serviceRequestRepository
+);
 
 app.use(mainRoutes);
 app.use("/residents", residentRoutes);
