@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -7,6 +8,8 @@ import { createApp } from "../src/app.js";
 import { Resident } from "../src/models/Resident.js";
 import { ResidentValidator } from "../src/services/ResidentValidator.js";
 
+const require = createRequire(import.meta.url);
+const packageMetadata = require("../package.json");
 
 
 const app = createApp();
@@ -27,7 +30,7 @@ test("home page displays the CSMS starter details", async () => {
 
   assert.match(
     response.text,
-    /Sprint 0 - Developer Onboarding/
+    /Final Release - T16/
   );
 
   assert.match(
@@ -35,7 +38,15 @@ test("home page displays the CSMS starter details", async () => {
     /JavaScript with Express\.js/
   );
 
-  assert.match(response.text, /0\.1\.0/);
+  assert.ok(response.text.includes(packageMetadata.version));
+
+  assert.ok(
+    response.text.includes(`v${packageMetadata.version}`)
+  );
+
+  assert.ok(
+    response.text.includes("Administration Workspace")
+  );
 });
 
 test("health endpoint returns the expected payload", async () => {
@@ -46,7 +57,7 @@ test("health endpoint returns the expected payload", async () => {
   assert.deepEqual(response.body, {
     status: "ok",
     application: "Community Services Management System",
-    version: "0.1.0"
+    version: packageMetadata.version
   });
 });
 

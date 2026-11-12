@@ -2,10 +2,15 @@
  * Shared CSMS application and server configuration.
  */
 
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const packageMetadata = require("../../package.json");
+
 export const applicationConfig = Object.freeze({
   name: "Community Services Management System",
-  version: "0.1.0",
-  currentSprint: "Sprint 0 - Developer Onboarding",
+  version: packageMetadata.version,
+  currentSprint: "Final Release - T16",
   technology: "JavaScript with Express.js"
 });
 
