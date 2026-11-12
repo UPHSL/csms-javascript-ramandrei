@@ -17,11 +17,20 @@ function getFormData(body = {}) {
   };
 }
 
+
 function parseResidentId(value) {
+  if (
+    typeof value !== "string" ||
+    !/^[1-9]\d*$/.test(value)
+  ) {
+    return null;
+  }
+
   const id = Number(value);
 
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
+  return Number.isSafeInteger(id) ? id : null;
 }
+
 
 function showNotFound(response) {
   return response.status(404).render("residents/not-found", {

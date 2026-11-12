@@ -50,11 +50,14 @@ export default class ServiceRequestStatusService {
     }
 
     const allowedTargets =
-      ALLOWED_TRANSITIONS[
-        serviceRequest.status
-      ];
+  ALLOWED_TRANSITIONS[
+    serviceRequest.status
+  ];
 
-    if (!allowedTargets.has(requestedStatus)) {
+if (
+  !allowedTargets ||
+  !allowedTargets.has(requestedStatus)
+) {
       return {
         success: false,
         serviceRequest: null,
