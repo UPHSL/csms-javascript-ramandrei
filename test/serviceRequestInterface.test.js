@@ -844,3 +844,73 @@ test("T13 Test 20: GET requests do not modify Service Request state", async () =
     }
   });
 });
+
+
+/* =========================================
+   T15 TEST 3
+   Read-only GET requests preserve all persisted fields
+========================================= */
+
+test(
+  "T15 Test 3: Read-only GET requests preserve the complete Service Request records",
+  async () => {
+    await withTestApp(async (app) => {
+      const resident = persistResident(app);
+
+      const pendingRequest = persistServiceRequest(
+        app,
+        resident.id,
+        {
+          serviceType: "Barangay Clearance",
+          description: "Pending request snapshot test."
+        }
+      );
+
+      const inProgressRequest = persistServiceRequest(
+        app,
+        resident.id,
+        {
+          serviceType: "Streetlight Repair",
+          description: "In-progress request snapshot test."
+        }
+      );
+
+      transitionRequest(
+        app,
+        inProgressRequest.id,
+        "In Progress"
+      );
+
+      const getAllRequests = () =>
+        app.locals.serviceRequestServices.query
+          .listServiceRequests();
+
+      // Capture every persisted Service Request field.
+      const before = getAllRequests();
+
+      const getPaths = [
+        "/service-requests",
+        "/service-requests?search=clearance",
+        "/service-requests?status=Pending",
+        "/service-requests?search=streetlight&status=In%20Progress",
+        "/service-requests/new",
+        `/service-requests/${pendingRequest.id}`,
+        `/service-requests/${inProgressRequest.id}`
+      ];
+
+      for (const url of getPaths) {
+        await request(app)
+          .get(url)
+          .expect(200);
+
+        const after = getAllRequests();
+
+        assert.deepEqual(
+          after,
+          before,
+          `GET ${url} unexpectedly changed persisted Service Request records`
+        );
+      }
+    });
+  }
+);

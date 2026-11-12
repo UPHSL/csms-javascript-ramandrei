@@ -449,3 +449,114 @@ test("T12 Test 14: GET requests do not change Resident status", async () => {
     }
   });
 });
+
+
+// T15 Test 1 — Malformed Resident identifiers must not access or modify records.
+test(
+  "T15 Test 1: Malformed Resident identifier is rejected without persistence changes",
+  async () => {
+    await withTestApp(async (app) => {
+      const resident = persistResident(app);
+
+      const before = app.locals.residentRepository.findById(
+        resident.id
+      );
+
+      // Number("1e0") evaluates to 1, but this is not a valid route ID.
+      const malformedId = `${resident.id}e0`;
+
+      // Malformed identifiers must not access an existing Resident.
+      await request(app)
+        .get(`/residents/${malformedId}/edit`)
+        .expect(404);
+
+      // They must not update an existing Resident either.
+      await request(app)
+        .post(`/residents/${malformedId}`)
+        .type("form")
+        .send(validForm({
+          firstName: "Unexpected Change"
+        }))
+        .expect(404);
+
+      // They must not deactivate an existing Resident.
+      await request(app)
+        .post(`/residents/${malformedId}/deactivate`)
+        .expect(404);
+
+      const after = app.locals.residentRepository.findById(
+        resident.id
+      );
+
+      assert.deepEqual(after, before);
+
+      assert.equal(
+        app.locals.residentServices.query.listResidents().length,
+        1
+      );
+    });
+  }
+);
+
+
+/* =========================================
+   T15 TEST 5
+   Repeatability and Numeric ID Boundaries
+========================================= */
+
+test(
+  "T15 Test 5: Invalid numeric Resident identifiers are consistently rejected without persistence changes",
+  async () => {
+    await withTestApp(async (app) => {
+      const resident = persistResident(app);
+
+      const before = app.locals.residentRepository
+        .findById(resident.id);
+
+      const invalidIds = [
+        "0",
+        "-1",
+        "1.0",
+        "01",
+        "9007199254740992"
+      ];
+
+      // Repeat each invalid request to verify consistent rejection.
+      for (const invalidId of invalidIds) {
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+          await request(app)
+            .get(`/residents/${invalidId}/edit`)
+            .expect(404);
+
+          await request(app)
+            .post(`/residents/${invalidId}`)
+            .type("form")
+            .send(validForm({
+              firstName: "Unexpected Change"
+            }))
+            .expect(404);
+
+          await request(app)
+            .post(`/residents/${invalidId}/deactivate`)
+            .expect(404);
+        }
+      }
+
+      // Confirm the original Resident remains unchanged.
+      const after = app.locals.residentRepository
+        .findById(resident.id);
+
+      assert.deepEqual(
+        after,
+        before,
+        "Rejected boundary identifiers unexpectedly modified the Resident."
+      );
+
+      // Confirm no additional Residents were created.
+      assert.equal(
+        app.locals.residentServices.query.listResidents().length,
+        1
+      );
+    });
+  }
+);

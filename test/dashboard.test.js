@@ -703,3 +703,108 @@ test("T14 Test 15: Dashboard GET does not modify persisted records", async () =>
     assert.equal(savedRequest.status, "Pending");
   });
 });
+
+
+/* =========================================
+   T15 TEST 4
+   Cross-Feature Regression:
+   Resident Deactivation and Dashboard
+========================================= */
+
+test(
+  "T15 Test 4: Resident deactivation through the route updates Resident Management and Dashboard",
+  async () => {
+    await withTestApp(async (app) => {
+      const resident = persistResident(app, {
+        firstName: "CrossFeature",
+        lastName: "Regression",
+        email: "crossfeature@example.com"
+      });
+
+      // Confirm the initial Resident state.
+      const initialResident =
+        app.locals.residentRepository.findById(
+          resident.id
+        );
+
+      assert.ok(initialResident);
+      assert.equal(initialResident.status, "Active");
+
+      const beforeDashboard = await getDashboard(app);
+
+      assertMetric(
+        beforeDashboard.text,
+        "Total Residents",
+        1
+      );
+
+      assertMetric(
+        beforeDashboard.text,
+        "Active Residents",
+        1
+      );
+
+      assertMetric(
+        beforeDashboard.text,
+        "Inactive Residents",
+        0
+      );
+
+      // Deactivate through the actual HTTP route.
+      const deactivationResponse = await request(app)
+        .post(`/residents/${resident.id}/deactivate`)
+        .expect(303);
+
+      assert.equal(
+        deactivationResponse.headers.location,
+        "/residents?notice=deactivated"
+      );
+
+      // Verify the Resident Management module.
+      const residentListResponse = await request(app)
+        .get("/residents")
+        .expect(200);
+
+      assert.match(
+        residentListResponse.text,
+        /CrossFeature Regression/
+      );
+
+      assert.match(
+        residentListResponse.text,
+        /Inactive/
+      );
+
+      // Verify persisted Resident data.
+      const savedResident =
+        app.locals.residentRepository.findById(
+          resident.id
+        );
+
+      assert.ok(savedResident);
+      assert.equal(savedResident.status, "Inactive");
+      assert.equal(savedResident.id, resident.id);
+
+      // Verify that the Dashboard reflects the same change.
+      const afterDashboard = await getDashboard(app);
+
+      assertMetric(
+        afterDashboard.text,
+        "Total Residents",
+        1
+      );
+
+      assertMetric(
+        afterDashboard.text,
+        "Active Residents",
+        0
+      );
+
+      assertMetric(
+        afterDashboard.text,
+        "Inactive Residents",
+        1
+      );
+    });
+  }
+);

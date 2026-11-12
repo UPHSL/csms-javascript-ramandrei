@@ -976,3 +976,68 @@ test(
     }
   }
 );
+
+
+// T15 Test 2 — Unexpected persisted status must not crash or modify persistence.
+test(
+  "T15 Test 2: Unexpected persisted status is handled safely",
+  () => {
+    const {
+      databasePath,
+      database,
+      residentRepository,
+      submissionService,
+      serviceRequestRepository,
+      statusService
+    } = createStatusSetup();
+
+    try {
+      const serviceRequest =
+        submitPendingRequest(
+          residentRepository,
+          submissionService
+        );
+
+      // Simulate an unexpected legacy or corrupted database value.
+      database.prepare(`
+        UPDATE service_requests
+        SET status = ?
+        WHERE id = ?
+      `).run(
+        "Archived",
+        serviceRequest.id
+      );
+
+      const original =
+        serviceRequestRepository.findById(
+          serviceRequest.id
+        );
+
+      const result =
+        statusService.updateStatus(
+          serviceRequest.id,
+          "In Progress"
+        );
+
+      const storedRequest =
+        serviceRequestRepository.findById(
+          serviceRequest.id
+        );
+
+      assert.equal(result.success, false);
+      assert.equal(result.invalidTransition, true);
+
+      assert.deepEqual(
+        storedRequest,
+        original
+      );
+
+      assert.equal(
+        storedRequest.status,
+        "Archived"
+      );
+    } finally {
+      cleanup(databasePath, database);
+    }
+  }
+);
