@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import express from "express";
+import { applicationConfig } from "./config/application.js";
 
 import { createDatabase } from "./database/database.js";
 import { ResidentRepository } from "./repositories/ResidentRepository.js";
@@ -47,6 +48,7 @@ export function createApp({
   databasePath = defaultDatabasePath
 } = {}) {
   const app = express();
+  app.locals.applicationConfig = applicationConfig;
 
   app.disable("x-powered-by");
 
