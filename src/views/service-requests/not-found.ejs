@@ -1,0 +1,32 @@
+
+<%
+  const activePage = 'service-requests';
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'service-requests' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
+
+      <div class="main-content">
+        <section class="empty-state page-empty-state">
+          <div class="empty-state-icon">▤</div>
+          <span class="eyebrow">REQUEST MANAGEMENT</span>
+          <h1>Service Request Not Found</h1>
+          <p><%= message %></p>
+          <a href="/service-requests" class="button button-primary">Return to Service Requests</a>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

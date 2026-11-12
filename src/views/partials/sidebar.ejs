@@ -1,0 +1,38 @@
+
+<%
+  const currentPage = typeof activePage !== 'undefined' ? activePage : '';
+%>
+
+<aside class="sidebar" id="appSidebar">
+  <a href="/dashboard" class="sidebar-brand">
+    <span class="sidebar-brand-mark">C</span>
+    <span>
+      <strong>CSMS</strong>
+      <small>Community Services</small>
+    </span>
+  </a>
+
+  <div class="sidebar-section-label">WORKSPACE</div>
+
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+      <span class="nav-icon">▦</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="/residents" class="<%= currentPage === 'residents' ? 'active' : '' %>">
+      <span class="nav-icon">♙</span>
+      <span>Residents</span>
+    </a>
+
+    <a href="/service-requests" class="<%= currentPage === 'service-requests' ? 'active' : '' %>">
+      <span class="nav-icon">▤</span>
+      <span>Service Requests</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <span class="sidebar-footer-dot"></span>
+    <span>Community Services Management</span>
+  </div>
+</aside>

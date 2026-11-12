@@ -1,0 +1,146 @@
+
+<%
+  const activePage = 'dashboard';
+
+  const sortedRecentRequests = [...(recentServiceRequests || [])]
+    .sort((a, b) =>
+      String(b.dateRequested).localeCompare(String(a.dateRequested)) ||
+      Number(b.id) - Number(a.id)
+    )
+    .slice(0, 5);
+
+  const dashboardStats = [
+    { label: 'Total Residents', value: residents.total },
+    { label: 'Active Residents', value: residents.active },
+    { label: 'Inactive Residents', value: residents.inactive },
+    { label: 'Total Service Requests', value: serviceRequests.total },
+    { label: 'Pending', value: serviceRequests.pending },
+    { label: 'In Progress', value: serviceRequests.inProgress },
+    { label: 'Completed', value: serviceRequests.completed },
+    { label: 'Cancelled', value: serviceRequests.cancelled },
+    { label: 'Open Requests', value: serviceRequests.open }
+  ];
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('partials/sidebar', { activePage: 'dashboard' }) %>
+
+    <main class="main-area">
+      <%- include('partials/topbar') %>
+
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">OVERVIEW</span>
+            <h1>Dashboard</h1>
+            <p>Monitor residents and community service requests.</p>
+          </div>
+          <a href="/service-requests/new" class="button button-primary">
+            + New Service Request
+          </a>
+        </section>
+
+        <section class="dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Resident Overview</h2>
+              <p>Summary of registered residents</p>
+            </div>
+            <a href="/residents" class="text-link">View residents →</a>
+          </div>
+
+          <div class="dashboard-grid">
+            <% dashboardStats.slice(0, 3).forEach((stat) => { %>
+              <article class="dashboard-stat dashboard-card">
+                <h3><%= stat.label %></h3>
+                <p class="dashboard-number"><%= Number(stat.value) || 0 %></p>
+              </article>
+            <% }); %>
+          </div>
+        </section>
+
+        <section class="dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Service Request Overview</h2>
+              <p>Current status of submitted requests</p>
+            </div>
+            <a href="/service-requests" class="text-link">View all requests →</a>
+          </div>
+
+          <div class="dashboard-grid dashboard-grid-five">
+            <% dashboardStats.slice(3).forEach((stat) => { %>
+              <article class="dashboard-stat dashboard-card">
+                <h3><%= stat.label %></h3>
+                <p class="dashboard-number"><%= Number(stat.value) || 0 %></p>
+              </article>
+            <% }); %>
+          </div>
+        </section>
+
+        <section class="content-card dashboard-section">
+          <div class="section-heading">
+            <div>
+              <h2>Recent Service Requests</h2>
+              <p>The latest submitted community requests</p>
+            </div>
+            <a href="/service-requests" class="text-link">See all →</a>
+          </div>
+
+          <% if (sortedRecentRequests.length === 0) { %>
+            <div class="empty-state">
+              <div class="empty-state-icon">▤</div>
+              <h3>No service requests yet</h3>
+              <p>Newly submitted requests will appear here.</p>
+            </div>
+          <% } else { %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Resident ID</th>
+                    <th>Service Type</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% sortedRecentRequests.forEach((request) => { %>
+                    <tr>
+                      <td><%= request.id %></td>
+                      <td><%= request.residentId %></td>
+                      <td><%= request.serviceType %></td>
+                      <td><%= request.dateRequested %></td>
+                      <td>
+                        <span class="status-badge status-<%= request.status.toLowerCase().replaceAll(' ', '-') %>">
+                          <%= request.status %>
+                        </span>
+                      </td>
+                      <td>
+                        <a class="table-link" href="/service-requests/<%= request.id %>">
+                          View details
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

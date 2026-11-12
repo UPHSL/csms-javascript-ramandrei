@@ -1,0 +1,91 @@
+
+<%
+  const activePage = 'residents';
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'residents' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
+
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">RESIDENT MANAGEMENT</span>
+            <h1>Register Resident</h1>
+            <p>Add a new resident to the community records.</p>
+          </div>
+          <a href="/residents" class="button button-secondary">← Back to Residents</a>
+        </section>
+
+        <% if (errorMessage) { %>
+          <div class="error-message">
+            <strong>Please correct the highlighted information.</strong>
+            <p><%= errorMessage %></p>
+          </div>
+        <% } %>
+
+        <section class="form-card">
+          <div class="form-card-heading">
+            <div>
+              <h2>Resident Information</h2>
+              <p>Enter the resident's details below. Fields marked with * are required.</p>
+            </div>
+          </div>
+
+          <form action="/residents" method="POST">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input id="firstName" name="firstName" type="text" value="<%= resident?.firstName || '' %>" required>
+              </div>
+
+              <div class="form-group">
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input id="lastName" name="lastName" type="text" value="<%= resident?.lastName || '' %>" required>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="address">Address <span class="required">*</span></label>
+                <textarea id="address" name="address" rows="3" required><%= resident?.address || '' %></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="contactNumber">Contact Number <span class="required">*</span></label>
+                <input
+                  id="contactNumber"
+                  name="contactNumber"
+                  type="tel"
+                  value="<%= resident?.contactNumber || '' %>"
+                  aria-describedby="contact-hint"
+                  required
+                >
+                <span class="field-hint" id="contact-hint">Enter a valid 11-digit mobile number starting with 09.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input id="email" name="email" type="email" value="<%= resident?.email || '' %>">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <a href="/residents" class="button button-secondary">Cancel</a>
+              <button type="submit" class="button button-primary">Register Resident</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+
+<%
+  const activePage = 'residents';
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %> | CSMS</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar', { activePage: 'residents' }) %>
+    <main class="main-area">
+      <%- include('../partials/topbar') %>
+
+      <div class="main-content">
+        <section class="page-header">
+          <div>
+            <span class="eyebrow">RECORD MANAGEMENT</span>
+            <h1>Resident Management</h1>
+            <p>Manage resident information and account status.</p>
+          </div>
+          <a href="/residents/new" class="button button-primary">+ Register Resident</a>
+        </section>
+
+        <% if (noticeMessage) { %>
+          <div class="notice-message"><%= noticeMessage %></div>
+        <% } %>
+
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <h2>Resident Records</h2>
+              <p>Search and manage registered residents.</p>
+            </div>
+            <span class="record-count"><%= residents.length %> records</span>
+          </div>
+
+          <form action="/residents" method="GET" class="search-form">
+            <div class="search-input-wrap">
+              <span class="search-icon">⌕</span>
+              <input
+                type="search"
+                name="search"
+                value="<%= searchTerm || '' %>"
+                placeholder="Search by name, email, or contact number..."
+                aria-label="Search residents"
+              >
+            </div>
+            <button type="submit" class="button button-primary">Search</button>
+            <a href="/residents" class="button button-secondary">Clear</a>
+          </form>
+
+          <% if (residents.length === 0) { %>
+            <div class="empty-state">
+              <div class="empty-state-icon">♙</div>
+              <h3>No residents found</h3>
+              <p>Try another search term or register a new resident.</p>
+              <a href="/residents/new" class="button button-primary">Register Resident</a>
+            </div>
+          <% } else { %>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Resident</th>
+                    <th>Contact Number</th>
+                    <th>Email Address</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% residents.forEach((resident) => { %>
+                    <tr>
+                      <td>
+                        <div class="table-primary-text"><%= resident.firstName %> <%= resident.lastName %></div>
+                        <span class="table-secondary-text">Resident #<%= resident.id %></span>
+                      </td>
+                      <td><%= resident.contactNumber %></td>
+                      <td><%= resident.email || '—' %></td>
+                      <td class="table-address"><%= resident.address %></td>
+                      <td>
+                        <span class="status-badge status-<%= resident.status.toLowerCase() %>">
+                          <%= resident.status %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="table-actions">
+                          <a class="button button-small button-secondary" href="/residents/<%= resident.id %>/edit">
+                            Edit
+                          </a>
+
+                          <% if (resident.status === 'Active') { %>
+                            <form
+                              action="/residents/<%= resident.id %>/deactivate"
+                              method="POST"
+                              onsubmit="return confirm('Are you sure you want to deactivate this resident?');"
+                            >
+                              <button type="submit" class="button button-small button-danger">
+                                Deactivate
+                              </button>
+                            </form>
+                          <% } %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
